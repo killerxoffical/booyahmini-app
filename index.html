@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TG Reward Mini App</title>
+    
+    <!-- Telegram Web App SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <!-- Your Ad Network SDK -->
+    <script src="//libtl.com/sdk.js" data-zone="11364833" data-sdk="show_11364833"></script>
+
+    <style>
+        /* Telegram Theme এর সাথে মিল রেখে ডিজাইন */
+        body {
+            background-color: var(--tg-theme-bg-color, #f4f4f5);
+            color: var(--tg-theme-text-color, #222222);
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 90vh;
+        }
+        
+        .card {
+            background-color: var(--tg-theme-secondary-bg-color, #ffffff);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 350px;
+        }
+
+        h2 {
+            margin-top: 0;
+            color: var(--tg-theme-text-color, #000);
+        }
+
+        .coin-box {
+            font-size: 24px;
+            font-weight: bold;
+            color: #FFD700; /* Gold color */
+            margin: 20px 0;
+            background: #333;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        button {
+            background-color: var(--tg-theme-button-color, #3390ec);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            border: none;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.2s;
+        }
+
+        button:active {
+            transform: scale(0.95);
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2 id="userName">Hello, User!</h2>
+        <p>Watch Ads to earn coins.</p>
+        
+        <div class="coin-box">
+            Coins: <span id="coinCount">0</span> 🪙
+        </div>
+
+        <!-- Buttons for Ads -->
+        <button onclick="watchRewardedInterstitial()">Watch Interstitial Ad (+10 Coins)</button>
+        <button onclick="watchRewardedPopup()">Watch Popup Ad (+20 Coins)</button>
+    </div>
+
+    <script>
+        // Telegram Web App Initialize
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // Mini app টা ফুলস্ক্রিন করার জন্য
+
+        // ইউজারের নাম দেখানো (যদি টেলিগ্রাম থেকে ডাটা পাওয়া যায়)
+        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+            document.getElementById('userName').innerText = "Hello, " + tg.initDataUnsafe.user.first_name + "!";
+        }
+
+        // Coin System Logic
+        let coins = 0;
+        function addCoins(amount) {
+            coins += amount;
+            document.getElementById('coinCount').innerText = coins;
+            // টেলিগ্রামের নেটিভ ভাইব্রেশন/হ্যাপটিক ফিডব্যাক
+            tg.HapticFeedback.notificationOccurred('success'); 
+        }
+
+        // 1. Rewarded Interstitial Ad Function
+        function watchRewardedInterstitial() {
+            if (typeof show_11364833 === "function") {
+                show_11364833().then(() => {
+                    // Ad দেখা শেষ হলে এই কোড রান হবে
+                    addCoins(10);
+                    tg.showAlert('Congratulations! You earned 10 Coins.');
+                }).catch(e => {
+                    console.error('Ad Error:', e);
+                });
+            } else {
+                tg.showAlert("Ad is still loading or blocked by Adblocker!");
+            }
+        }
+
+        // 2. Rewarded Popup Ad Function
+        function watchRewardedPopup() {
+            if (typeof show_11364833 === "function") {
+                show_11364833('pop').then(() => {
+                    // Ad দেখা শেষ হলে বা ক্লোজ করলে এই কোড রান হবে
+                    addCoins(20);
+                    tg.showAlert('Awesome! You earned 20 Coins.');
+                }).catch(e => {
+                    // এড প্লে হতে কোনো সমস্যা হলে
+                    console.log('Popup Ad Error/Closed early:', e);
+                });
+            } else {
+                tg.showAlert("Ad is still loading or blocked by Adblocker!");
+            }
+        }
+
+        // 3. In-App Interstitial (Auto Load)
+        // পেজ লোড হওয়ার সাথে সাথে ব্যাকগ্রাউন্ডে অটোমেটিক এড সেটিংস চালু হবে
+        window.addEventListener('load', () => {
+            if (typeof show_11364833 === "function") {
+                show_11364833({
+                    type: 'inApp',
+                    inAppSettings: {
+                        frequency: 2,
+                        capping: 0.1,
+                        interval: 30,
+                        timeout: 5,
+                        everyPage: false
+                    }
+                });
+            }
+        });
+
+    </script>
+</body>
+</html>
