@@ -2,143 +2,1359 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TG Reward Mini App</title>
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>TG Reward Pro</title>
+
     <!-- Telegram Web App SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    
-    <!-- Your Ad Network SDK -->
+
+    <!-- Ad Network SDK -->
     <script src="//libtl.com/sdk.js" data-zone="11364833" data-sdk="show_11364833"></script>
 
+    <!-- Lottie for animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
     <style>
-        /* Telegram Theme এর সাথে মিল রেখে ডিজাইন */
-        body {
-            background-color: var(--tg-theme-bg-color, #f4f4f5);
-            color: var(--tg-theme-text-color, #222222);
-            font-family: Arial, sans-serif;
-            text-align: center;
+        :root {
+            /* Premium Light Mode Colors */
+            --primary: #D97706; /* Amber Gold */
+            --primary-dark: #B45309;
+            --secondary: #EA580C; /* Rich orange */
+            --accent: #0D9488; /* Premium Teal */
+            --bg-dark: #F8FAFC; /* Soft slate/pearl white background */
+            --bg-card: #FFFFFF; /* Pure crisp white card */
+            --bg-card-hover: #F1F5F9;
+            --text-primary: #0F172A; /* Deep slate gray */
+            --text-secondary: #475569;
+            --text-muted: #64748B;
+            --success: #10B981;
+            --danger: #EF4444;
+            --warning: #F59E0B;
+            --gradient-gold: linear-gradient(135deg, #F59E0B 0%, #EA580C 100%);
+            --gradient-dark: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
+            --shadow-glow: 0 4px 20px rgba(217, 119, 6, 0.15);
+            --shadow-card: 0 10px 30px rgba(15, 23, 42, 0.05);
+        }
+
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .bg-animation .circle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(99, 102, 241, 0.04);
+            animation: float 20s infinite ease-in-out;
+        }
+
+        .bg-animation .circle:nth-child(1) {
+            width: 300px;
+            height: 300px;
+            top: -100px;
+            left: -100px;
+            animation-delay: 0s;
+        }
+
+        .bg-animation .circle:nth-child(2) {
+            width: 200px;
+            height: 200px;
+            top: 50%;
+            right: -50px;
+            animation-delay: -5s;
+        }
+
+        .bg-animation .circle:nth-child(3) {
+            width: 150px;
+            height: 150px;
+            bottom: -30px;
+            left: 30%;
+            background: rgba(236, 72, 153, 0.04);
+            animation-delay: -10s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -30px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+        }
+
+        /* Particle Effect */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(217, 119, 6, 0.2);
+            border-radius: 50%;
+            opacity: 0;
+            animation: particleFloat 15s infinite;
+        }
+
+        @keyframes particleFloat {
+            0% { opacity: 0; transform: translateY(100vh) scale(0); }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { opacity: 0; transform: translateY(-10vh) scale(1); }
+        }
+
+        /* Main Container */
+        .app-container {
+            position: relative;
+            z-index: 2;
+            max-width: 420px;
+            margin: 0 auto;
             padding: 20px;
+            padding-bottom: 100px;
+        }
+
+        /* Header */
+        .header {
             display: flex;
-            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            padding-top: 10px;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--gradient-gold);
+            display: flex;
             align-items: center;
             justify-content: center;
-            height: 90vh;
-        }
-        
-        .card {
-            background-color: var(--tg-theme-secondary-bg-color, #ffffff);
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            width: 100%;
-            max-width: 350px;
+            font-weight: 700;
+            font-size: 20px;
+            color: #FFFFFF;
+            box-shadow: var(--shadow-glow);
+            animation: pulse 2s infinite;
         }
 
-        h2 {
-            margin-top: 0;
-            color: var(--tg-theme-text-color, #000);
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 4px 15px rgba(245, 158, 11, 0.2); }
+            50% { box-shadow: 0 4px 25px rgba(245, 158, 11, 0.45); }
         }
 
-        .coin-box {
-            font-size: 24px;
-            font-weight: bold;
-            color: #FFD700; /* Gold color */
-            margin: 20px 0;
-            background: #333;
-            padding: 10px;
-            border-radius: 10px;
-        }
-
-        button {
-            background-color: var(--tg-theme-button-color, #3390ec);
-            color: var(--tg-theme-button-text-color, #ffffff);
-            border: none;
-            padding: 15px;
-            margin: 10px 0;
-            border-radius: 10px;
+        .user-info h3 {
             font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-            transition: 0.2s;
+            font-weight: 600;
+            color: var(--text-primary);
         }
 
-        button:active {
-            transform: scale(0.95);
-            opacity: 0.8;
+        .user-info p {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .streak-counter {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(239, 68, 68, 0.08);
+            border: 1px solid rgba(239, 68, 68, 0.15);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--danger);
+            animation: fireFlicker 1s infinite alternate;
+        }
+
+        @keyframes fireFlicker {
+            0% { box-shadow: 0 0 5px rgba(239, 68, 68, 0.1); }
+            100% { box-shadow: 0 0 12px rgba(239, 68, 68, 0.25); }
+        }
+
+        /* Coin Card */
+        .coin-card {
+            background: var(--gradient-dark);
+            border: 1px solid rgba(245, 158, 11, 0.15);
+            border-radius: 24px;
+            padding: 28px;
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-card), var(--shadow-glow);
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .coin-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(245, 158, 11, 0.04) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .coin-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .coin-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .coin-badge {
+            background: rgba(13, 148, 136, 0.1);
+            color: var(--accent);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .coin-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: var(--accent);
+            border-radius: 50%;
+            animation: blink 1.5s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .coin-amount {
+            font-size: 42px;
+            font-weight: 800;
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .coin-amount .coin-icon {
+            font-size: 36px;
+            -webkit-text-fill-color: #F59E0B;
+            animation: coinBounce 2s infinite;
+        }
+
+        @keyframes coinBounce {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-5px) rotate(10deg); }
+            75% { transform: translateY(-3px) rotate(-5deg); }
+        }
+
+        .coin-stats {
+            display: flex;
+            gap: 16px;
+            margin-top: 16px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat-item {
+            flex: 1;
+            background: rgba(15, 23, 42, 0.03);
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+            border: 1px solid rgba(15, 23, 42, 0.02);
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Progress Section */
+        .progress-section {
+            margin-bottom: 24px;
+            animation: slideUp 0.7s ease-out;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title .icon {
+            font-size: 20px;
+        }
+
+        .progress-ring-container {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 24px;
+            border: 1px solid rgba(15, 23, 42, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            box-shadow: var(--shadow-card);
+        }
+
+        .progress-ring {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            flex-shrink: 0;
+        }
+
+        .progress-ring svg {
+            transform: rotate(-90deg);
+        }
+
+        .progress-ring-bg {
+            fill: none;
+            stroke: rgba(15, 23, 42, 0.06);
+            stroke-width: 8;
+        }
+
+        .progress-ring-fill {
+            fill: none;
+            stroke: url(#progressGradient);
+            stroke-width: 8;
+            stroke-linecap: round;
+            stroke-dasharray: 251.2;
+            stroke-dashoffset: 251.2;
+            transition: stroke-dashoffset 1s ease-out;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .progress-text .number {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .progress-text .label {
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+
+        .progress-info {
+            flex: 1;
+        }
+
+        .progress-info h4 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .progress-info p {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: rgba(15, 23, 42, 0.06);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--gradient-gold);
+            border-radius: 3px;
+            transition: width 1s ease-out;
+            position: relative;
+        }
+
+        .progress-bar-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 20px;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3));
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(100px); }
+        }
+
+        /* Task List */
+        .tasks-section {
+            margin-bottom: 24px;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .task-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 16px;
+            border: 1px solid rgba(15, 23, 42, 0.06);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-card);
+        }
+
+        /* Active / Current Task Highlight */
+        .task-card.current {
+            border-color: var(--primary);
+            background: rgba(245, 158, 11, 0.04);
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.08);
+        }
+
+        .task-card:hover:not(.locked) {
+            transform: translateY(-2px);
+            border-color: rgba(245, 158, 11, 0.3);
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.06), 0 0 15px rgba(245, 158, 11, 0.05);
+        }
+
+        .task-card.completed {
+            opacity: 0.65;
+            border-color: rgba(13, 148, 136, 0.3);
+            background: rgba(13, 148, 136, 0.01);
+        }
+
+        .task-card.completed .task-icon {
+            background: rgba(13, 148, 136, 0.1);
+            color: var(--accent);
+        }
+
+        .task-card.locked {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .task-card.locked .task-icon {
+            background: rgba(15, 23, 42, 0.03);
+            color: var(--text-muted);
+        }
+
+        .task-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            background: rgba(245, 158, 11, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+
+        .task-card:not(.locked):hover .task-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .task-details {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .task-name {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: var(--text-primary);
+        }
+
+        .task-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .task-reward {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .task-status {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+
+        .task-status.pending {
+            background: rgba(245, 158, 11, 0.08);
+            color: var(--primary);
+        }
+
+        .task-status.completed {
+            background: var(--accent);
+            color: #FFFFFF;
+        }
+
+        .task-status.locked {
+            background: rgba(15, 23, 42, 0.03);
+            color: var(--text-muted);
+        }
+
+        /* Timer Display */
+        .timer-display {
+            background: linear-gradient(135deg, rgba(234, 88, 12, 0.08), rgba(245, 158, 11, 0.04));
+            border: 1px solid rgba(234, 88, 12, 0.15);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            animation: slideUp 0.9s ease-out, pulse 2s infinite;
+        }
+
+        .timer-icon {
+            font-size: 28px;
+            animation: tick 1s infinite;
+        }
+
+        @keyframes tick {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .timer-info {
+            text-align: center;
+        }
+
+        .timer-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .timer-value {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--secondary);
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 2px;
+        }
+
+        /* Main Action Button */
+        .action-section {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 20px;
+            background: linear-gradient(to top, var(--bg-dark) 60%, transparent);
+            z-index: 100;
+            max-width: 420px;
+            margin: 0 auto;
+        }
+
+        .main-btn {
+            width: 100%;
+            padding: 18px 24px;
+            border: none;
+            border-radius: 16px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .main-btn.primary {
+            background: var(--gradient-gold);
+            color: #FFFFFF;
+            box-shadow: 0 8px 24px rgba(234, 88, 12, 0.25), 0 0 0 1px rgba(245, 158, 11, 0.3);
+        }
+
+        .main-btn.primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(234, 88, 12, 0.35), 0 0 0 2px rgba(245, 158, 11, 0.45);
+        }
+
+        .main-btn.primary:active:not(:disabled) {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .main-btn:disabled {
+            background: #E2E8F0;
+            color: #94A3B8;
+            box-shadow: none;
+            cursor: not-allowed;
+            border: 1px solid rgba(0, 0, 0, 0.02);
+        }
+
+        .main-btn .btn-shine {
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .main-btn:hover:not(:disabled) .btn-shine {
+            left: 100%;
+        }
+
+        /* Confetti Canvas */
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* Coin Popup */
+        .coin-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            font-weight: 800;
+            color: var(--primary);
+            z-index: 1000;
+            pointer-events: none;
+            opacity: 0;
+            text-shadow: 0 4px 20px rgba(245, 158, 11, 0.4);
+        }
+
+        .coin-popup.show {
+            animation: coinPopup 1.5s ease-out forwards;
+        }
+
+        @keyframes coinPopup {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+            20% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+            40% { transform: translate(-50%, -60%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -100%) scale(0.8); }
+        }
+
+        /* Level Badge */
+        .level-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: linear-gradient(135deg, rgba(234, 88, 12, 0.1), rgba(245, 158, 11, 0.1));
+            border: 1px solid rgba(234, 88, 12, 0.15);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--secondary);
+        }
+
+        /* Ripple Effect */
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.35);
+            transform: scale(0);
+            animation: rippleEffect 0.6s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes rippleEffect {
+            to { transform: scale(4); opacity: 0; }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(245, 158, 11, 0.3);
+            border-radius: 2px;
+        }
+
+        /* Loading Skeleton */
+        .skeleton {
+            background: linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%);
+            background-size: 200% 100%;
+            animation: skeletonLoading 1.5s infinite;
+            border-radius: 8px;
+        }
+
+        @keyframes skeletonLoading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* Notification Toast */
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: var(--bg-card);
+            border: 1px solid rgba(245, 158, 11, 0.25);
+            border-radius: 16px;
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 1001;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.1);
+            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast-icon {
+            font-size: 24px;
+        }
+
+        .toast-text {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Responsive */
+        @media (max-width: 380px) {
+            .coin-amount { font-size: 32px; }
+            .timer-value { font-size: 20px; }
+            .task-name { font-size: 13px; }
         }
     </style>
+<base target="_blank">
 </head>
 <body>
+    <!-- Background Animation -->
+    <div class="bg-animation">
+        <div class="circle"></div>
+        <div class="circle"></div>
+        <div class="circle"></div>
+    </div>
 
-    <div class="card">
-        <h2 id="userName">Hello, User!</h2>
-        <p>Watch Ads to earn coins.</p>
-        
-        <div class="coin-box">
-            Coins: <span id="coinCount">0</span> 🪙
+    <!-- Particles -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Confetti Canvas -->
+    <canvas id="confetti-canvas"></canvas>
+
+    <!-- Coin Popup -->
+    <div class="coin-popup" id="coinPopup">+10 🪙</div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast">
+        <span class="toast-icon">✨</span>
+        <span class="toast-text" id="toastText">Task Completed!</span>
+    </div>
+
+    <!-- SVG Gradients -->
+    <svg width="0" height="0" style="position:absolute;">
+        <defs>
+            <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" style="stop-color:#F59E0B"/>
+                <stop offset="100%" style="stop-color:#EA580C"/>
+            </linearGradient>
+        </defs>
+    </svg>
+
+    <div class="app-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="user-profile">
+                <div class="avatar" id="userAvatar">👤</div>
+                <div class="user-info">
+                    <h3 id="userName">Hello, User!</h3>
+                    <p id="userLevel">Level 1 • Newbie</p>
+                </div>
+            </div>
+            <div class="streak-counter" id="streakCounter">
+                <span>🔥</span>
+                <span id="streakText">0 Day</span>
+            </div>
         </div>
 
-        <!-- Buttons for Ads -->
-        <button onclick="watchRewardedInterstitial()">Watch Interstitial Ad (+10 Coins)</button>
-        <button onclick="watchRewardedPopup()">Watch Popup Ad (+20 Coins)</button>
+        <!-- Coin Card -->
+        <div class="coin-card">
+            <div class="coin-header">
+                <span class="coin-label">Total Balance</span>
+                <span class="coin-badge">Active</span>
+            </div>
+            <div class="coin-amount">
+                <span class="coin-icon">🪙</span>
+                <span id="coinCount">0</span>
+            </div>
+            <div class="coin-stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="todayEarnings">0</div>
+                    <div class="stat-label">Today</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="totalAds">0</div>
+                    <div class="stat-label">Ads Watched</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="tasksDone">0</div>
+                    <div class="stat-label">Tasks Done</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Section -->
+        <div class="progress-section">
+            <div class="section-header">
+                <div class="section-title">
+                    <span class="icon">📊</span>
+                    Daily Progress
+                </div>
+                <span class="level-badge" id="levelBadge">Bronze</span>
+            </div>
+            <div class="progress-ring-container">
+                <div class="progress-ring">
+                    <svg width="100" height="100" viewBox="0 0 100 100">
+                        <circle class="progress-ring-bg" cx="50" cy="50" r="40"/>
+                        <circle class="progress-ring-fill" id="progressRing" cx="50" cy="50" r="40"/>
+                    </svg>
+                    <div class="progress-text">
+                        <div class="number" id="progressPercent">0%</div>
+                        <div class="label">Complete</div>
+                    </div>
+                </div>
+                <div class="progress-info">
+                    <h4>Daily Target</h4>
+                    <p>Watch ads to earn coins and complete your daily tasks!</p>
+                    <div class="progress-bar">
+                        <div class="progress-bar-fill" id="progressBar" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timer Display -->
+        <div class="timer-display" id="timerDisplay">
+            <span class="timer-icon">⏱️</span>
+            <div class="timer-info">
+                <div class="timer-label">Next Task Available In</div>
+                <div class="timer-value" id="timerValue">00:00</div>
+            </div>
+        </div>
+
+        <!-- Tasks Section -->
+        <div class="tasks-section">
+            <div class="section-header">
+                <div class="section-title">
+                    <span class="icon">🎯</span>
+                    Today's Tasks
+                </div>
+                <span style="font-size: 13px; color: var(--text-muted);" id="taskCounter">0/20</span>
+            </div>
+            <div class="task-list" id="taskList">
+                <!-- Tasks dynamically generated by JS -->
+            </div>
+        </div>
+
+        <!-- Spacer for fixed button -->
+        <div style="height: 80px;"></div>
+    </div>
+
+    <!-- Action Button -->
+    <div class="action-section">
+        <button class="main-btn primary" id="adButton" onclick="watchAd()">
+            <span class="btn-shine"></span>
+            <span>🎬</span>
+            <span id="btnText">Watch Ad (+10 Coins)</span>
+        </button>
     </div>
 
     <script>
-        // Telegram Web App Initialize
+        // ==================== CONFIGURATION ====================
+        const MAX_ADS_PER_DAY = 20;
+        const COOLDOWN_1_MIN = 60 * 1000;
+        const COOLDOWN_5_MIN = 5 * 60 * 1000;
+        const COIN_PER_AD = 10;
+
+        // ==================== TELEGRAM SETUP ====================
         const tg = window.Telegram.WebApp;
-        tg.expand(); // Mini app টা ফুলস্ক্রিন করার জন্য
+        tg.expand();
+        tg.ready();
 
-        // ইউজারের নাম দেখানো (যদি টেলিগ্রাম থেকে ডাটা পাওয়া যায়)
+        // Set theme matching Light Mode
+        tg.setHeaderColor('#F8FAFC');
+        tg.setBackgroundColor('#F8FAFC');
+
+        // User info
         if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-            document.getElementById('userName').innerText = "Hello, " + tg.initDataUnsafe.user.first_name + "!";
+            const user = tg.initDataUnsafe.user;
+            document.getElementById('userName').innerText = "Hello, " + user.first_name + "!";
+            document.getElementById('userAvatar').innerText = user.first_name.charAt(0).toUpperCase();
         }
 
-        // Coin System Logic
-        let coins = 0;
-        function addCoins(amount) {
-            coins += amount;
-            document.getElementById('coinCount').innerText = coins;
-            // টেলিগ্রামের নেটিভ ভাইব্রেশন/হ্যাপটিক ফিডব্যাক
-            tg.HapticFeedback.notificationOccurred('success'); 
+        // ==================== STATE MANAGEMENT ====================
+        let coins = parseInt(localStorage.getItem('coins')) || 0;
+        let adCount = parseInt(localStorage.getItem('adCount')) || 0;
+        let todayEarnings = parseInt(localStorage.getItem('todayEarnings')) || 0;
+        let streak = parseInt(localStorage.getItem('streak')) || 0;
+        let lastAdTime = parseInt(localStorage.getItem('lastAdTime')) || 0;
+        let timerInterval;
+        let confettiInstance = null;
+
+        // ==================== PARTICLE SYSTEM ====================
+        function initParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                particle.style.animationDuration = (10 + Math.random() * 10) + 's';
+                container.appendChild(particle);
+            }
         }
 
-        // 1. Rewarded Interstitial Ad Function
-        function watchRewardedInterstitial() {
+        // ==================== CONFETTI SYSTEM ====================
+        class ConfettiSystem {
+            constructor() {
+                this.canvas = document.getElementById('confetti-canvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.particles = [];
+                this.resize();
+                window.addEventListener('resize', () => this.resize());
+                this.animate();
+            }
+
+            resize() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+            }
+
+            createParticle(x, y) {
+                const colors = ['#FFD700', '#FF6B35', '#00D4AA', '#FF4757', '#FFA502', '#FFFFFF'];
+                return {
+                    x, y,
+                    vx: (Math.random() - 0.5) * 15,
+                    vy: -Math.random() * 15 - 5,
+                    size: Math.random() * 8 + 4,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    rotation: Math.random() * 360,
+                    rotationSpeed: (Math.random() - 0.5) * 10,
+                    gravity: 0.4,
+                    drag: 0.96,
+                    life: 1
+                };
+            }
+
+            explode(x, y, count = 50) {
+                for (let i = 0; i < count; i++) {
+                    this.particles.push(this.createParticle(x, y));
+                }
+            }
+
+            animate() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+                this.particles = this.particles.filter(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += p.gravity;
+                    p.vx *= p.drag;
+                    p.vy *= p.drag;
+                    p.rotation += p.rotationSpeed;
+                    p.life -= 0.015;
+
+                    if (p.life <= 0) return false;
+
+                    this.ctx.save();
+                    this.ctx.translate(p.x, p.y);
+                    this.ctx.rotate(p.rotation * Math.PI / 180);
+                    this.ctx.globalAlpha = p.life;
+                    this.ctx.fillStyle = p.color;
+                    this.ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size);
+                    this.ctx.restore();
+
+                    return true;
+                });
+
+                requestAnimationFrame(() => this.animate());
+            }
+        }
+
+        // ==================== UI UPDATES ====================
+        function updateUI() {
+            document.getElementById('coinCount').innerText = coins.toLocaleString();
+            document.getElementById('todayEarnings').innerText = '+' + todayEarnings;
+            document.getElementById('totalAds').innerText = adCount;
+            document.getElementById('tasksDone').innerText = adCount;
+            document.getElementById('taskCounter').innerText = `${adCount}/${MAX_ADS_PER_DAY}`;
+            document.getElementById('streakText').innerText = streak + ' Day' + (streak !== 1 ? 's' : '');
+
+            // Update progress ring
+            const percent = Math.min((adCount / MAX_ADS_PER_DAY) * 100, 100);
+            const circumference = 2 * Math.PI * 40;
+            const offset = circumference - (percent / 100) * circumference;
+            document.getElementById('progressRing').style.strokeDashoffset = offset;
+            document.getElementById('progressPercent').innerText = Math.round(percent) + '%';
+            document.getElementById('progressBar').style.width = percent + '%';
+
+            // Update level badge
+            const levels = ['Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond'];
+            const levelIndex = Math.min(Math.floor(adCount / 4), 4);
+            document.getElementById('levelBadge').innerText = levels[levelIndex];
+            document.getElementById('userLevel').innerText = `Level ${levelIndex + 1} • ${levels[levelIndex]}`;
+
+            // Generate dynamic ad task list
+            generateTaskList();
+        }
+
+        // --- Generates exactly 20 dynamic ad tasks linked to actual progress ---
+        function generateTaskList() {
+            const taskList = document.getElementById('taskList');
+            taskList.innerHTML = '';
+
+            for (let i = 1; i <= MAX_ADS_PER_DAY; i++) {
+                const isCompleted = i <= adCount;
+                const isCurrent = i === (adCount + 1);
+                const isLocked = i > (adCount + 1);
+
+                // Set cooldown rule text
+                const cooldownText = (i <= 10) ? "1m Cooldown" : "5m Cooldown";
+
+                const card = document.createElement('div');
+                card.className = `task-card ${isCompleted ? 'completed' : ''} ${isLocked ? 'locked' : ''} ${isCurrent ? 'current' : ''}`;
+                
+                card.innerHTML = `
+                    <div class="task-icon">${isCompleted ? '✅' : '🎬'}</div>
+                    <div class="task-details">
+                        <div class="task-name" style="font-weight: ${isCurrent ? '700' : '600'}">Watch Video Ad #${i}</div>
+                        <div class="task-meta">
+                            <span class="task-reward">+10 🪙</span>
+                            <span>•</span>
+                            <span style="color: ${isCurrent ? 'var(--primary-dark)' : 'var(--text-muted)'}">${cooldownText}</span>
+                        </div>
+                    </div>
+                    <div class="task-status ${isCompleted ? 'completed' : isLocked ? 'locked' : 'pending'}">
+                        ${isCompleted ? '✓' : isLocked ? '🔒' : '▶'}
+                    </div>
+                `;
+
+                // If this is the current active/playable task, clicking on it triggers the ad
+                if (isCurrent) {
+                    card.addEventListener('click', function(e) {
+                        createRipple(e, this);
+                        watchAd();
+                    });
+                }
+
+                taskList.appendChild(card);
+            }
+        }
+
+        function createRipple(e, element) {
+            const ripple = document.createElement('div');
+            ripple.className = 'ripple';
+            const rect = element.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = (e.clientX - rect.left - size/2) + 'px';
+            ripple.style.top = (e.clientY - rect.top - size/2) + 'px';
+            element.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 600);
+        }
+
+        // ==================== TIMER SYSTEM ====================
+        function updateTimer() {
+            const btn = document.getElementById('adButton');
+            const btnText = document.getElementById('btnText');
+            const timerValue = document.getElementById('timerValue');
+            const timerDisplay = document.getElementById('timerDisplay');
+
+            if (adCount >= MAX_ADS_PER_DAY) {
+                btn.disabled = true;
+                btnText.innerText = 'Daily Limit Reached';
+                timerDisplay.style.display = 'none';
+                return;
+            }
+
+            const cooldownTime = (adCount < 10) ? COOLDOWN_1_MIN : COOLDOWN_5_MIN;
+            const timePassed = Date.now() - lastAdTime;
+            const timeLeft = cooldownTime - timePassed;
+
+            if (timeLeft > 0) {
+                btn.disabled = true;
+                timerDisplay.style.display = 'flex';
+
+                clearInterval(timerInterval);
+                timerInterval = setInterval(() => {
+                    const nowLeft = cooldownTime - (Date.now() - lastAdTime);
+                    if (nowLeft <= 0) {
+                        clearInterval(timerInterval);
+                        updateTimer();
+                    } else {
+                        const m = Math.floor(nowLeft / 60000);
+                        const s = Math.floor((nowLeft % 60000) / 1000);
+                        const timeStr = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+                        timerValue.innerText = timeStr;
+                        btnText.innerText = `Wait ${m}m ${s}s`;
+                    }
+                }, 1000);
+
+                const m = Math.floor(timeLeft / 60000);
+                const s = Math.floor((timeLeft % 60000) / 1000);
+                timerValue.innerText = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+                btnText.innerText = `Wait ${m}m ${s}s`;
+            } else {
+                btn.disabled = false;
+                btnText.innerText = 'Watch Ad (+10 Coins)';
+                timerDisplay.style.display = 'none';
+            }
+        }
+
+        // ==================== COIN ANIMATION ====================
+        function showCoinAnimation(amount) {
+            const popup = document.getElementById('coinPopup');
+            popup.innerText = `+${amount} 🪙`;
+            popup.classList.remove('show');
+            void popup.offsetWidth; // Trigger reflow
+            popup.classList.add('show');
+
+            // Confetti explosion
+            const rect = document.getElementById('coinCount').getBoundingClientRect();
+            confettiInstance.explode(rect.left + rect.width/2, rect.top + rect.height/2, 30);
+        }
+
+        // ==================== TOAST NOTIFICATION ====================
+        function showToast(message, icon = '✨') {
+            const toast = document.getElementById('toast');
+            const toastText = document.getElementById('toastText');
+            toastText.innerText = message;
+            toast.querySelector('.toast-icon').innerText = icon;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // ==================== WATCH AD FUNCTION ====================
+        function watchAd() {
+            if (adCount >= MAX_ADS_PER_DAY) return;
+
+            // Simple prevention during countdown or double tap
+            const cooldownTime = (adCount < 10) ? COOLDOWN_1_MIN : COOLDOWN_5_MIN;
+            if (Date.now() - lastAdTime < cooldownTime) {
+                showToast("Please wait for cooldown!", "⏳");
+                return;
+            }
+
+            const btn = document.getElementById('adButton');
+            btn.disabled = true;
+            document.getElementById('btnText').innerText = 'Loading Ad...';
+
+            // Haptic feedback
+            if (tg.HapticFeedback) {
+                tg.HapticFeedback.impactOccurred('medium');
+            }
+
             if (typeof show_11364833 === "function") {
                 show_11364833().then(() => {
-                    // Ad দেখা শেষ হলে এই কোড রান হবে
-                    addCoins(10);
-                    tg.showAlert('Congratulations! You earned 10 Coins.');
+                    // Success
+                    coins += COIN_PER_AD;
+                    todayEarnings += COIN_PER_AD;
+                    adCount++;
+                    lastAdTime = Date.now();
+
+                    localStorage.setItem('coins', coins);
+                    localStorage.setItem('todayEarnings', todayEarnings);
+                    localStorage.setItem('adCount', adCount);
+                    localStorage.setItem('lastAdTime', lastAdTime);
+
+                    // Animations
+                    showCoinAnimation(COIN_PER_AD);
+                    showToast(`Ad Complete! +${COIN_PER_AD} Coins`, '🎉');
+
+                    if (tg.HapticFeedback) {
+                        tg.HapticFeedback.notificationOccurred('success');
+                    }
+
+                    // Check milestones
+                    if (adCount === 10) {
+                        showToast('Halfway there! Keep going!', '🔥');
+                    } else if (adCount === MAX_ADS_PER_DAY) {
+                        showToast('Daily Goal Complete! Amazing!', '🏆');
+                        confettiInstance.explode(window.innerWidth/2, window.innerHeight/2, 100);
+                    }
+
+                    updateUI();
+                    updateTimer();
                 }).catch(e => {
                     console.error('Ad Error:', e);
+                    showToast('Ad failed. Try again!', '❌');
+                    updateTimer();
+                    updateUI();
                 });
             } else {
-                tg.showAlert("Ad is still loading or blocked by Adblocker!");
+                showToast('Ad blocker detected!', '⚠️');
+                updateTimer();
+                updateUI();
             }
         }
 
-        // 2. Rewarded Popup Ad Function
-        function watchRewardedPopup() {
-            if (typeof show_11364833 === "function") {
-                show_11364833('pop').then(() => {
-                    // Ad দেখা শেষ হলে বা ক্লোজ করলে এই কোড রান হবে
-                    addCoins(20);
-                    tg.showAlert('Awesome! You earned 20 Coins.');
-                }).catch(e => {
-                    // এড প্লে হতে কোনো সমস্যা হলে
-                    console.log('Popup Ad Error/Closed early:', e);
-                });
-            } else {
-                tg.showAlert("Ad is still loading or blocked by Adblocker!");
+        // ==================== DAILY RESET ====================
+        function checkDailyReset() {
+            const todayDate = new Date().toDateString();
+            const savedDate = localStorage.getItem('lastResetDate');
+
+            if (savedDate !== todayDate) {
+                // Check streak
+                const lastDate = savedDate ? new Date(savedDate) : null;
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+
+                if (lastDate && lastDate.toDateString() === yesterday.toDateString()) {
+                    streak++;
+                    localStorage.setItem('streak', streak);
+                    showToast(`${streak} Day Streak! 🔥`, '🔥');
+                } else if (lastDate && lastDate.toDateString() !== todayDate) {
+                    streak = 1;
+                    localStorage.setItem('streak', streak);
+                }
+
+                localStorage.setItem('adCount', 0);
+                localStorage.setItem('todayEarnings', 0);
+                localStorage.setItem('lastResetDate', todayDate);
+                localStorage.removeItem('lastAdTime');
+
+                adCount = 0;
+                todayEarnings = 0;
+                lastAdTime = 0;
             }
         }
 
-        // 3. In-App Interstitial (Auto Load)
-        // পেজ লোড হওয়ার সাথে সাথে ব্যাকগ্রাউন্ডে অটোমেটিক এড সেটিংস চালু হবে
+        // ==================== INITIALIZATION ====================
         window.addEventListener('load', () => {
+            initParticles();
+            confettiInstance = new ConfettiSystem();
+            checkDailyReset();
+            updateUI();
+            updateTimer();
+
+            // Background interstitial ad
             if (typeof show_11364833 === "function") {
                 show_11364833({
                     type: 'inApp',
@@ -153,6 +1369,10 @@
             }
         });
 
+        // Button ripple effect
+        document.getElementById('adButton').addEventListener('click', function(e) {
+            createRipple(e, this);
+        });
     </script>
 </body>
 </html>
