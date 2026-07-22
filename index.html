@@ -13,7 +13,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-    <!-- Ad Network SDK (Explicit HTTPS) -->
+    <!-- Ad Network SDK -->
     <script src="https://libtl.com/sdk.js" data-zone="11364833" data-sdk="show_11364833"></script>
 
     <!-- Lottie for animations -->
@@ -504,7 +504,7 @@
 
         .task-details {
             flex: 1;
-            min-width: 0;
+ min-width: 0;
         }
 
         .task-name {
@@ -752,18 +752,24 @@
         </div>
     </div>
 
-    <!-- ==================== CUSTOM BENGALI TRANSFER POPUP MODAL ==================== -->
-    <div id="transfer-modal" class="fixed inset-0 z-[200] bg-black/80 flex items-center justify-center p-4 backdrop-blur-md hidden transition-opacity duration-300">
-        <div class="bg-[#FFFFFF] border border-[#FF6B00]/30 rounded-2xl p-6 w-full max-w-sm shadow-2xl relative text-center">
-            <div id="transfer-modal-icon" class="text-4xl mb-2">🎁</div>
-            <h3 id="transfer-modal-title" class="font-game font-black text-sm text-[#0F172A] tracking-wider uppercase mb-3">Booyah ওয়ালেট ট্রান্সফার</h3>
-            <div id="transfer-modal-body" class="text-xs text-[#475569] leading-relaxed text-left bg-slate-50 p-4 rounded-xl border border-slate-100 mb-5 whitespace-pre-line font-sans">
-                <!-- Dynamic Content Injected Here -->
+    <!-- ==================== ULTRA-PREMIUM BENGALI TRANSFER MODAL ==================== -->
+    <div id="transfer-modal" class="fixed inset-0 z-[200] bg-black/85 flex items-center justify-center p-4 backdrop-blur-md hidden transition-all duration-300">
+        <div class="bg-[#151B2D] border border-[#FF6B00]/40 rounded-3xl p-6 w-full max-w-sm shadow-[0_0_50px_rgba(255,107,0,0.25)] relative text-center overflow-hidden">
+            <!-- Background Glow Elements -->
+            <div class="absolute -top-12 -left-12 w-28 h-28 bg-[#FF6B00]/20 rounded-full blur-2xl"></div>
+            <div class="absolute -bottom-12 -right-12 w-28 h-28 bg-[#FFCC00]/20 rounded-full blur-2xl"></div>
+
+            <div id="transfer-modal-icon" class="text-5xl mb-2 drop-shadow-[0_0_15px_rgba(255,204,0,0.4)]">⚡</div>
+            <h3 id="transfer-modal-title" class="font-game font-black text-base text-[#FFCC00] tracking-widest uppercase mb-1">BOOYAH WALLET SYNC</h3>
+            <p id="transfer-modal-subtitle" class="text-[10px] text-[#7E8B9B] font-bold uppercase font-game mb-4 tracking-wider">Direct Wallet Sync Protocol</p>
+            
+            <div id="transfer-modal-body" class="space-y-3 mb-5 text-left">
+                <!-- Dynamic Content & Progress Bars Injected Here -->
             </div>
             
-            <div id="transfer-modal-actions" class="flex gap-3">
-                <button id="transfer-modal-close" onclick="closeTransferModal()" class="w-full py-3 bg-slate-200 text-[#0F172A] font-bold text-xs rounded-xl font-game tracking-wider">বন্ধ করুন</button>
-                <button id="transfer-modal-confirm" onclick="executeTransfer()" class="w-full py-3 bg-gradient-to-r from-[#FF6B00] to-[#FFCC00] text-[#0A0E1A] font-black text-xs rounded-xl font-game tracking-wider hidden">কনফার্ম ট্রান্সফার</button>
+            <div id="transfer-modal-actions" class="flex gap-3 pt-2">
+                <button id="transfer-modal-close" onclick="closeTransferModal()" class="w-full py-3.5 bg-[#0A0E1A] border border-white/10 text-white font-black text-xs rounded-xl font-game tracking-wider active:scale-95 transition">বন্ধ করুন</button>
+                <button id="transfer-modal-confirm" onclick="executeTransfer()" class="w-full py-3.5 bg-gradient-to-r from-[#FF6B00] to-[#FFCC00] text-[#0A0E1A] font-black text-xs rounded-xl font-game tracking-wider shadow-[0_0_15px_rgba(255,107,0,0.3)] hover:brightness-110 active:scale-95 transition hidden">কনফার্ম ট্রান্সফার</button>
             </div>
         </div>
     </div>
@@ -1084,6 +1090,9 @@
                     const isLocked = i > (adCount + 1);
                     const isCurrent = i === (adCount + 1);
 
+                    // Alternates between Rewarded Interstitial and Rewarded Popup
+                    const isRewardedType = (i % 2 !== 0);
+                    const adTypeName = isRewardedType ? "Rewarded Interstitial" : "Rewarded Popup";
                     const cooldownText = (i <= 10) ? "1 Min Cooldown" : "5 Min Cooldown";
 
                     const card = document.createElement('div');
@@ -1092,7 +1101,7 @@
                     card.innerHTML = '\
                         <div class="task-icon">' + (isCompleted ? '✅' : '🎁') + '</div>\
                         <div class="task-details">\
-                            <div class="task-name" style="font-weight: ' + (isCurrent ? '700' : '600') + '">Watch Video Ad #' + i + '</div>\
+                            <div class="task-name" style="font-weight: ' + (isCurrent ? '700' : '600') + '">' + adTypeName + ' #' + i + '</div>\
                             <div class="task-meta">\
                                 <span class="task-reward">Mystery Reward</span>\
                                 <span>•</span>\
@@ -1134,7 +1143,10 @@
                     return;
                 }
 
+                const currentTaskNum = adCount + 1;
+                const isRewardedType = (currentTaskNum % 2 !== 0);
                 const cooldownTime = getCooldownTime();
+
                 const timePassed = Date.now() - lastAdTime;
                 const timeLeft = cooldownTime - timePassed;
 
@@ -1163,7 +1175,7 @@
                     btnText.innerText = 'Wait ' + m + 'm ' + s + 's';
                 } else {
                     btn.disabled = false;
-                    btnText.innerText = 'Watch Rewarded Ad';
+                    btnText.innerText = isRewardedType ? 'Watch Rewarded Ad' : 'Watch Popup Ad';
                     timerDisplay.style.display = 'none';
                 }
             } catch (err) {
@@ -1212,7 +1224,7 @@
             }
         }
 
-        // ==================== WATCH AD FUNCTION ====================
+        // ==================== WATCH AD FUNCTION (Dual Alternating Interactive Ads) ====================
         function watchAd() {
             if (adCount >= MAX_ADS_PER_DAY) return;
 
@@ -1229,6 +1241,9 @@
                 return;
             }
 
+            const currentTaskNum = adCount + 1;
+            const isRewardedType = (currentTaskNum % 2 !== 0);
+
             const btn = document.getElementById('adButton');
             if (!btn) return;
 
@@ -1236,9 +1251,11 @@
                 btn.disabled = true;
                 document.getElementById('btnText').innerText = "Loading Ad Player...";
 
-                // Trigger standard Rewarded Interstitial Ad
-                show_11364833().then(function() {
-                    // Ad successfully watched! Now run 15s verification sequence
+                // Execute appropriate interactive ad format
+                let adPromise = isRewardedType ? show_11364833() : show_11364833('pop');
+
+                adPromise.then(function() {
+                    // Ad completed successfully! Now start 15s watch verification timer
                     let verifySeconds = 15;
                     document.getElementById('btnText').innerText = '📡 VERIFYING WATCH (' + verifySeconds + 's)...';
                     
@@ -1288,18 +1305,18 @@
                     }, 15000); // 15s Verification
                 }).catch(function(e) {
                     console.error('Ad Error:', e);
-                    alert("Ad playback failed or blocked. Please disable AdBlocker and try again!");
+                    alert("বিজ্ঞাপন লোড হতে সমস্যা হয়েছে বা বন্ধ করা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন!");
                     updateTimer();
                     updateUI();
                 });
             } else {
-                alert("Ad SDK not loaded! Please check your internet connection.");
+                alert("Ad SDK লোড হয়নি! আপনার ইন্টারনেট কানেকশন বা AdBlocker চেক করুন।");
                 updateTimer();
                 updateUI();
             }
         }
 
-        // ==================== BENGALI CUSTOM TRANSFER MODAL SYSTEM ====================
+        // ==================== ULTRA-PREMIUM TRANSFER MODAL SYSTEM ====================
         function transferFunds() {
             try {
                 const currentUser = auth.currentUser;
@@ -1315,27 +1332,67 @@
                 const confirmBtn = document.getElementById('transfer-modal-confirm');
                 const icon = document.getElementById('transfer-modal-icon');
 
-                // Check Threshold: Exactly 1500 Coins AND 5.0 Diamonds
+                const coinPercent = Math.min((coins / 1500) * 100, 100);
+                const diamondPercent = Math.min((diamonds / 5.0) * 100, 100);
+
+                const neededCoins = 1500 - coins;
+                const neededDiamonds = (5.0 - diamonds).toFixed(2);
+
                 if (coins >= 1500 && diamonds >= 5.0) {
                     icon.innerText = "🎉";
-                    title.innerText = "Booyah ওয়ালেট ট্রান্সফার";
-                    body.innerText = "আপনার কানেক্টেড প্রোফাইলে (UID: " + currentUser.uid + ") " + coins + " কয়েন এবং " + diamonds.toFixed(2) + " ডায়মন্ড সফলভাবে ট্রান্সফার করতে চান?";
+                    title.innerText = "TRANSFER READY";
+                    
+                    body.innerHTML = '\
+                        <div class="p-3 bg-[#0A0E1A] rounded-xl border border-[#FFCC00]/30 text-white mb-3">\
+                            <span class="text-[10px] text-[#7E8B9B] font-bold font-game uppercase block mb-1">CONNECTED PROFILE</span>\
+                            <span class="text-xs font-black font-game text-[#FFCC00]">UID: ' + (currentUser.uid) + '</span>\
+                        </div>\
+                        <p class="text-xs text-[#7E8B9B] font-medium leading-relaxed">\
+                            আপনার অ্যাকাউন্টে <b class="text-white">' + coins + ' কয়েন</b> এবং <b class="text-white">' + diamonds.toFixed(2) + ' ডায়মন্ড</b> সফলভাবে ট্রান্সফার করতে নিচের কনফার্ম বাটনে চাপুন।\
+                        </p>\
+                    ';
                     confirmBtn.classList.remove('hidden');
                 } else {
-                    icon.innerText = "❌";
-                    title.innerText = "ট্রান্সফার ব্যর্থ হয়েছে!";
-                    
-                    const neededCoins = 1500 - coins;
-                    const neededDiamonds = (5.0 - diamonds).toFixed(2);
-                    
-                    const coinDiffText = neededCoins > 0 ? neededCoins + " কয়েন" : "০ (সম্পূর্ণ)";
-                    const diamondDiffText = neededDiamonds > 0 ? neededDiamonds + " ডায়মন্ড" : "০.০০ (সম্পূর্ণ)";
+                    icon.innerText = "🔒";
+                    title.innerText = "TRANSFER LOCKED";
 
-                    body.innerText = "আপনার ব্যালেন্স পর্যাপ্ত নয়। ওয়ালেট ট্রান্সফার করার জন্য মিনিমাম ১৫০০ কয়েন এবং ৫.০ ডায়মন্ড প্রয়োজন।\n\n" +
-                        "📊 আপনার বর্তমান ব্যালেন্স:\n" +
-                        "• কয়েন: " + coins + " / ১৫০০ (আরও প্রয়োজন: " + coinDiffText + ")\n" +
-                        "• ডায়মন্ড: " + diamonds.toFixed(2) + " / ৫.০ (আরও প্রয়োজন: " + diamondDiffText + ")\n\n" +
-                        "দয়া করে আরও অ্যাড দেখে লক্ষ্য পূরণ করুন!";
+                    const coinStatusBadge = neededCoins <= 0 
+                        ? '<span class="text-[9px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">সম্পূর্ণ ✓</span>'
+                        : '<span class="text-[9px] font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">প্রয়োজন: ' + neededCoins + '</span>';
+
+                    const diamondStatusBadge = neededDiamonds <= 0 
+                        ? '<span class="text-[9px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">সম্পূর্ণ ✓</span>'
+                        : '<span class="text-[9px] font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">প্রয়োজন: ' + neededDiamonds + '</span>';
+
+                    body.innerHTML = '\
+                        <p class="text-[11px] text-[#7E8B9B] font-medium mb-3">\
+                            ওয়ালেট ট্রান্সফার করার জন্য মিনিমাম <b class="text-white">১৫০০ কয়েন</b> এবং <b class="text-white">৫.০ ডায়মন্ড</b> প্রয়োজন।\
+                        </p>\
+                        \
+                        <!-- Coin Progress Box -->\
+                        <div class="p-3 bg-[#0A0E1A] rounded-xl border border-white/5 space-y-1.5">\
+                            <div class="flex justify-between items-center text-[11px] font-bold">\
+                                <span class="text-white font-game">🪙 Coins</span>\
+                                <span class="text-[#FFCC00] font-game">' + coins + ' / 1500</span>\
+                            </div>\
+                            <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">\
+                                <div class="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full transition-all" style="width: ' + coinPercent + '%"></div>\
+                            </div>\
+                            <div class="flex justify-end pt-0.5">' + coinStatusBadge + '</div>\
+                        </div>\
+                        \
+                        <!-- Diamond Progress Box -->\
+                        <div class="p-3 bg-[#0A0E1A] rounded-xl border border-white/5 space-y-1.5 mt-2">\
+                            <div class="flex justify-between items-center text-[11px] font-bold">\
+                                <span class="text-white font-game">💎 Diamonds</span>\
+                                <span class="text-cyan-400 font-game">' + diamonds.toFixed(2) + ' / 5.00</span>\
+                            </div>\
+                            <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">\
+                                <div class="h-full bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full transition-all" style="width: ' + diamondPercent + '%"></div>\
+                            </div>\
+                            <div class="flex justify-end pt-0.5">' + diamondStatusBadge + '</div>\
+                        </div>\
+                    ';
                     
                     confirmBtn.classList.add('hidden');
                 }
@@ -1538,6 +1595,22 @@
 
             try { updateUI(); } catch(e) { console.error(e); }
             try { updateTimer(); } catch(e) { console.error(e); }
+
+            // Auto Background In-App Interstitial Ad Init
+            try {
+                if (typeof show_11364833 === "function") {
+                    show_11364833({
+                        type: 'inApp',
+                        inAppSettings: {
+                            frequency: 2,
+                            capping: 0.1,
+                            interval: 30,
+                            timeout: 5,
+                            everyPage: false
+                        }
+                    });
+                }
+            } catch(e) { console.error(e); }
         });
     </script>
 </body>
