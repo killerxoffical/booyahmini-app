@@ -709,7 +709,7 @@
 </head>
 <body>
 
-    <!-- ==================== FIREBASE LOGIN OVERLAY CARD (WHITE THEME) ==================== -->
+    <!-- ==================== FIREBASE LOGIN OVERLAY CARD ==================== -->
     <div id="auth-overlay" class="fixed inset-0 z-[150] bg-black/60 flex items-center justify-center p-4 backdrop-blur-md hidden transition-opacity duration-500">
         <div class="bg-white border border-slate-200 rounded-3xl p-6 w-full max-w-sm shadow-2xl relative">
             <div class="text-center mb-5">
@@ -805,7 +805,7 @@
                     <span>🔥</span> OPEN BOOYAH DAY APP
                 </button>
 
-                <!-- Updated Lifetime vs Today's Completed Stats -->
+                <!-- Stats Grid -->
                 <div class="coin-stats">
                     <div class="stat-item">
                         <div class="stat-value" id="totalAds">0</div>
@@ -906,7 +906,7 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // ==================== REWARDS DATABASE (20 Ads) ====================
+        // ==================== REWARDS DATABASE ====================
         const REWARDS_CONFIG = [
             { coins: 5, diamonds: 0.00 }, // 1
             { coins: 0, diamonds: 0.20 }, // 2
@@ -936,12 +936,13 @@
         const COOLDOWN_5_MIN = 5 * 60 * 1000; // Next 10 ads = 5m cooldown
 
         // ==================== STATE MANAGEMENT ====================
-        let coins = parseInt(localStorage.getItem('coins')) || 0;
-        let diamonds = parseFloat(localStorage.getItem('diamonds')) || 0.00;
-        let adCount = parseInt(localStorage.getItem('adCount')) || 0;
-        let lifetimeAdCount = parseInt(localStorage.getItem('lifetimeAdCount')) || adCount;
+        let coins = 0;
+        let diamonds = 0.00;
+        let adCount = 0;
+        let lifetimeAdCount = 0;
+        let lastAdTime = 0;
+
         let streak = parseInt(localStorage.getItem('streak')) || 0;
-        let lastAdTime = parseInt(localStorage.getItem('lastAdTime')) || 0;
         let timerInterval;
         let confettiInstance = null;
 
@@ -1036,19 +1037,19 @@
             }
         }
 
-        // ==================== UI UPDATES (FIXED PROGRESS PERCENT) ====================
+        // ==================== UI UPDATES (DYNAMIC PERCENT & COUNTERS) ====================
         function updateUI() {
             try {
                 document.getElementById('coinCount').innerText = coins.toLocaleString();
                 document.getElementById('diamondCount').innerText = diamonds.toFixed(2);
-                document.getElementById('totalAds').innerText = lifetimeAdCount; // Lifetime Counter
-                document.getElementById('tasksDone').innerText = adCount;        // Today's Counter
+                document.getElementById('totalAds').innerText = lifetimeAdCount; 
+                document.getElementById('tasksDone').innerText = adCount;        
                 document.getElementById('taskCounter').innerText = adCount + '/' + MAX_ADS_PER_DAY;
                 document.getElementById('streakText').innerText = streak + ' Day' + (streak !== 1 ? 's' : '');
 
                 // Dynamically Calculate Daily Progress Percent (0% to 100%)
                 const percent = Math.min((adCount / MAX_ADS_PER_DAY) * 100, 100);
-                const circumference = 2 * Math.PI * 40; // ~251.2
+                const circumference = 251.2; // 2 * PI * 40
                 const offset = circumference - (percent / 100) * circumference;
 
                 const progressRing = document.getElementById('progressRing');
@@ -1065,7 +1066,7 @@
             generateTaskList();
         }
 
-        // ==================== TASK LIST GENERATOR (STRICT TIMERS & STATUS) ====================
+        // ==================== TASK LIST GENERATOR ====================
         function generateTaskList() {
             try {
                 const taskList = document.getElementById('taskList');
@@ -1095,19 +1096,19 @@
                         statusHtml = '<span class="text-xs font-bold text-teal-600">✓ Completed</span>';
                     } else if (isCurrent) {
                         if (isTimerActive) {
-                            // Timer active -> Lock icon displayed, NO EMOJI next to timer text!
+                            // Active Timer -> Lock Icon, NO EMOJI next to countdown text!
                             iconSymbol = '🔒';
                             const m = Math.floor(timeLeft / 60000);
                             const s = Math.floor((timeLeft % 60000) / 1000);
                             metaText = "Wait " + m + "m " + s + "s";
                             statusHtml = '<span class="text-xs font-bold text-amber-600">🔒 Locked</span>';
                         } else {
-                            // Timer expired -> Ready!
+                            // Timer Expired -> Ready!
                             iconSymbol = '🎁';
                             statusHtml = '<span class="text-xs font-bold text-emerald-600">▶ Ready</span>';
                         }
                     } else {
-                        // Future locked tasks
+                        // Future Locked Tasks
                         iconSymbol = '🔒';
                         statusHtml = '<span class="text-xs font-bold text-slate-400">🔒 Locked</span>';
                     }
@@ -1175,14 +1176,14 @@
                         if (nowLeft <= 0) {
                             clearInterval(timerInterval);
                             updateTimer();
-                            updateUI(); // Refresh task status to "Ready"
+                            updateUI();
                         } else {
                             const m = Math.floor(nowLeft / 60000);
                             const s = Math.floor((nowLeft % 60000) / 1000);
                             const timeStr = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
                             timerValue.innerText = timeStr;
                             btnText.innerText = 'Wait ' + m + 'm ' + s + 's';
-                            generateTaskList(); // Refresh active task timer in list
+                            generateTaskList();
                         }
                     }, 1000);
 
@@ -1241,9 +1242,16 @@
             }
         }
 
-        // ==================== WATCH AD FUNCTION ====================
+        // ==================== WATCH AD FUNCTION (FIREBASE CLOUD WRITE) ====================
         function watchAd() {
             if (adCount >= MAX_ADS_PER_DAY) return;
+
+            const currentUser = auth.currentUser;
+            if (!currentUser) {
+                alert("অ্যাকাউন্ট সেশন পাওয়া যায়নি! অনুগ্রহ করে আগে লগইন করুন।");
+                document.getElementById('auth-overlay').classList.remove('hidden');
+                return;
+            }
 
             const cooldownTime = getCooldownTime();
             if (Date.now() - lastAdTime < cooldownTime) {
@@ -1285,6 +1293,9 @@
         }
 
         function executeAdPlayback() {
+            const currentUser = auth.currentUser;
+            if (!currentUser) return;
+
             const currentTaskNum = adCount + 1;
             const isRewardedType = (currentTaskNum % 2 !== 0);
             const btnText = document.getElementById('btnText');
@@ -1305,41 +1316,46 @@
                         }
                     }, 1000);
 
-                    setTimeout(function() {
+                    setTimeout(async function() {
                         clearInterval(verifyInterval);
 
                         const rewards = REWARDS_CONFIG[adCount];
                         const coinReward = rewards.coins;
                         const diamondReward = rewards.diamonds;
+                        const nowTime = Date.now();
 
-                        coins += coinReward;
-                        diamonds += diamondReward;
-                        adCount++;
-                        lifetimeAdCount++;
-                        lastAdTime = Date.now();
+                        // ★ REAL-TIME FIRESTORE UPDATE (INSTANT CLOUD SYNC) ★
+                        try {
+                            const userRef = db.collection('users').doc(currentUser.uid);
+                            await userRef.set({
+                                tma_coins: firebase.firestore.FieldValue.increment(coinReward),
+                                tma_diamonds: firebase.firestore.FieldValue.increment(diamondReward),
+                                tma_adCount: firebase.firestore.FieldValue.increment(1),
+                                tma_lifetimeAdCount: firebase.firestore.FieldValue.increment(1),
+                                tma_lastAdTime: nowTime,
+                                tma_lastResetDate: new Date().toDateString()
+                            }, { merge: true });
 
-                        localStorage.setItem('coins', coins);
-                        localStorage.setItem('diamonds', diamonds);
-                        localStorage.setItem('adCount', adCount);
-                        localStorage.setItem('lifetimeAdCount', lifetimeAdCount);
-                        localStorage.setItem('lastAdTime', lastAdTime);
+                            // Global device count tracking
+                            const updatedDeviceCount = (parseInt(localStorage.getItem('device_daily_adCount')) || 0) + 1;
+                            localStorage.setItem('device_daily_adCount', updatedDeviceCount);
 
-                        const updatedDeviceCount = (parseInt(localStorage.getItem('device_daily_adCount')) || 0) + 1;
-                        localStorage.setItem('device_daily_adCount', updatedDeviceCount);
-
-                        showCoinAnimation(coinReward, diamondReward);
-                        
-                        let completeMsg = "Node Updated!";
-                        if (coinReward > 0 && diamondReward > 0) {
-                            completeMsg = '+' + coinReward + ' Coins & +' + diamondReward.toFixed(2) + ' Diamonds Claimed!';
-                        } else if (coinReward > 0) {
-                            completeMsg = '+' + coinReward + ' Coins Claimed!';
-                        } else if (diamondReward > 0) {
-                            completeMsg = '+' + diamondReward.toFixed(2) + ' Diamonds Claimed!';
+                            showCoinAnimation(coinReward, diamondReward);
+                            
+                            let completeMsg = "Node Updated!";
+                            if (coinReward > 0 && diamondReward > 0) {
+                                completeMsg = '+' + coinReward + ' Coins & +' + diamondReward.toFixed(2) + ' Diamonds Claimed!';
+                            } else if (coinReward > 0) {
+                                completeMsg = '+' + coinReward + ' Coins Claimed!';
+                            } else if (diamondReward > 0) {
+                                completeMsg = '+' + diamondReward.toFixed(2) + ' Diamonds Claimed!';
+                            }
+                            showToast(completeMsg);
+                        } catch (cloudErr) {
+                            console.error("Firestore sync failed: ", cloudErr);
+                            alert("ডাটাবেজ আপডেট করতে সমস্যা হয়েছে। দয়া করে আবার চেষ্টা করুন!");
                         }
-                        showToast(completeMsg);
 
-                        updateUI();
                         updateTimer();
                     }, 15000); // 15s Verification
                 }).catch(function(e) {
@@ -1467,15 +1483,24 @@
                     const currentDbCoins = sfDoc.data().coins || 0;
                     const currentDbDiamonds = sfDoc.data().diamonds || 0;
                     
+                    const currentTmaCoins = sfDoc.data().tma_coins || 0;
+                    const currentTmaDiamonds = sfDoc.data().tma_diamonds || 0;
+
+                    if (currentTmaCoins < 1500 || currentTmaDiamonds < 5.0) {
+                        throw "Insufficient Mini App balance to complete transfer!";
+                    }
+                    
                     transaction.update(userRef, {
-                        coins: currentDbCoins + coins,
-                        diamonds: currentDbDiamonds + diamonds
+                        coins: currentDbCoins + currentTmaCoins,
+                        diamonds: currentDbDiamonds + currentTmaDiamonds,
+                        tma_coins: 0,
+                        tma_diamonds: 0.00
                     });
                 });
 
                 const trxId = Math.floor(Math.random() * 9000000).toString();
                 await userRef.collection('transactions').doc(trxId).set({
-                    title: "TMA NODE MINING",
+                    title: "TMA REWARD MINING",
                     amount: diamonds,
                     currency: "diamonds",
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
@@ -1483,24 +1508,18 @@
 
                 const trxIdCoins = Math.floor(Math.random() * 9000000).toString();
                 await userRef.collection('transactions').doc(trxIdCoins).set({
-                    title: "TMA NODE MINING",
+                    title: "TMA REWARD MINING",
                     amount: coins,
                     currency: "coins",
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
                 closeTransferModal();
-                alert('অভিনন্দন! আপনার ' + coins + ' কয়েন এবং ' + diamonds.toFixed(2) + ' ডায়মন্ড Booyah Arena প্রোফাইলে সফলভাবে যুক্ত করা হয়েছে।');
+                alert('অভিনন্দন! আপনার ' + coins + ' কয়েন এবং ' + diamonds.toFixed(2) + ' ডায়মন্ড Booyah Arena প্রধান অ্যাকাউন্টে সফলভাবে যুক্ত করা হয়েছে।');
                 
-                coins = 0;
-                diamonds = 0.00;
-                localStorage.setItem('coins', coins);
-                localStorage.setItem('diamonds', diamonds);
-                
-                updateUI();
             } catch (err) {
                 console.error("Transfer Error: ", err);
-                alert("ডাটাবেজ ত্রুটি: " + err.message);
+                alert("ডাটাবেজ ত্রুটি: " + (err.message || err));
             } finally {
                 btn.disabled = false;
                 btn.innerText = "কনফার্ম ট্রান্সফার";
@@ -1521,46 +1540,8 @@
             }
         }
 
-        // ==================== DAILY RESET ====================
-        function checkDailyReset() {
-            try {
-                const todayDate = new Date().toDateString();
-                const savedDate = localStorage.getItem('lastResetDate');
-
-                const deviceDate = localStorage.getItem('device_lastResetDate');
-                if (deviceDate !== todayDate) {
-                    localStorage.setItem('device_daily_adCount', 0);
-                    localStorage.setItem('device_lastResetDate', todayDate);
-                }
-
-                if (savedDate !== todayDate) {
-                    const lastDate = savedDate ? new Date(savedDate) : null;
-                    const yesterday = new Date();
-                    yesterday.setDate(yesterday.getDate() - 1);
-
-                    if (lastDate && lastDate.toDateString() === yesterday.toDateString()) {
-                        streak++;
-                        localStorage.setItem('streak', streak);
-                        showToast(streak + ' Day Streak Active!');
-                    } else if (lastDate && lastDate.toDateString() !== todayDate) {
-                        streak = 1;
-                        localStorage.setItem('streak', streak);
-                    }
-
-                    localStorage.setItem('adCount', 0);
-                    localStorage.setItem('lastResetDate', todayDate);
-                    localStorage.removeItem('lastAdTime');
-
-                    adCount = 0;
-                    lastAdTime = 0;
-                }
-            } catch (err) {
-                console.error(err);
-            }
-        }
-
-        // ==================== FIREBASE AUTH & ANTI-BYPASS LOCK ====================
-        auth.onAuthStateChanged(async (user) => {
+        // ==================== FIREBASE REALTIME LISTENER & AUTH ====================
+        auth.onAuthStateChanged((user) => {
             if (user) {
                 const today = new Date().toDateString();
                 const deviceLockedUid = localStorage.getItem('device_locked_uid');
@@ -1578,18 +1559,42 @@
                 }
 
                 document.getElementById('auth-overlay').classList.add('hidden');
-                
-                try {
-                    const userSnap = await db.collection('users').doc(user.uid).get();
-                    if (userSnap.exists) {
-                        const data = userSnap.data();
+
+                // Real-time Firestore sync listener across all devices
+                db.collection('users').doc(user.uid).onSnapshot(async (docSnap) => {
+                    if (docSnap.exists) {
+                        const data = docSnap.data();
+                        
                         document.getElementById('userUID').innerText = "UID: " + (data.uid || user.uid);
+                        if (data.avatar) {
+                            document.getElementById('headerAvatar').src = data.avatar;
+                        }
+
+                        // Check daily reset on cloud state
+                        if (data.tma_lastResetDate !== today) {
+                            await db.collection('users').doc(user.uid).set({
+                                tma_adCount: 0,
+                                tma_lastResetDate: today
+                            }, { merge: true });
+                            adCount = 0;
+                        } else {
+                            adCount = data.tma_adCount || 0;
+                        }
+
+                        coins = data.tma_coins || 0;
+                        diamonds = data.tma_diamonds || 0.00;
+                        lifetimeAdCount = data.tma_lifetimeAdCount || adCount;
+                        lastAdTime = data.tma_lastAdTime || 0;
+
+                        updateUI();
+                        updateTimer();
                     } else {
                         document.getElementById('userUID').innerText = "UID: " + user.uid;
                     }
-                } catch(e) {
-                    document.getElementById('userUID').innerText = "UID: " + user.uid;
-                }
+                }, (err) => {
+                    console.error("Firestore Listener Error: ", err);
+                });
+
             } else {
                 document.getElementById('auth-overlay').classList.remove('hidden');
                 document.getElementById('userUID').innerText = "UID: Please Connect";
@@ -1620,7 +1625,6 @@
         window.addEventListener('load', function() {
             try { initParticles(); } catch(e) { console.error(e); }
             try { confettiInstance = new ConfettiSystem(); } catch(e) { console.error(e); }
-            try { checkDailyReset(); } catch(e) { console.error(e); }
             
             try {
                 if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
@@ -1636,7 +1640,7 @@
             try { updateUI(); } catch(e) { console.error(e); }
             try { updateTimer(); } catch(e) { console.error(e); }
 
-            // Auto Background In-App Interstitial Ad Init
+            // Auto In-App Background Ad Init
             try {
                 if (typeof show_11364833 === "function") {
                     show_11364833({
