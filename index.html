@@ -13,7 +13,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-    <!-- Ad Network SDK -->
+    <!-- Ad Network SDK (Loaded with Explicit Protocol) -->
     <script src="https://libtl.com/sdk.js" data-zone="11364833" data-sdk="show_11364833"></script>
 
     <!-- Lottie for animations -->
@@ -504,7 +504,7 @@
 
         .task-details {
             flex: 1;
- min-width: 0;
+            min-width: 0;
         }
 
         .task-name {
@@ -1090,7 +1090,6 @@
                     const isLocked = i > (adCount + 1);
                     const isCurrent = i === (adCount + 1);
 
-                    // Alternates between Rewarded Interstitial and Rewarded Popup
                     const isRewardedType = (i % 2 !== 0);
                     const adTypeName = isRewardedType ? "Rewarded Interstitial" : "Rewarded Popup";
                     const cooldownText = (i <= 10) ? "1 Min Cooldown" : "5 Min Cooldown";
@@ -1224,7 +1223,7 @@
             }
         }
 
-        // ==================== WATCH AD FUNCTION (Dual Alternating Interactive Ads) ====================
+        // ==================== WATCH AD FUNCTION (Smart Retry Engine) ====================
         function watchAd() {
             if (adCount >= MAX_ADS_PER_DAY) return;
 
@@ -1241,28 +1240,49 @@
                 return;
             }
 
+            const btn = document.getElementById('adButton');
+            const btnText = document.getElementById('btnText');
+            if (!btn || !btnText) return;
+
+            btn.disabled = true;
+            btnText.innerText = "Ad Engine Loading...";
+
+            // Check if show_11364833 is loaded, if not retry for 3 seconds
+            if (typeof show_11364833 !== "function") {
+                let retryCount = 0;
+                let checkSDK = setInterval(function() {
+                    retryCount++;
+                    if (typeof show_11364833 === "function") {
+                        clearInterval(checkSDK);
+                        executeAdPlayback();
+                    } else if (retryCount >= 3) {
+                        clearInterval(checkSDK);
+                        alert("অ্যাড ইঞ্জিনের সাথে সংযোগ স্থাপন হতে পারছে না!\n\nঅনুগ্রহ করে আপনার ডিভাইসের AdBlocker বা Private DNS বন্ধ করুন অথবা ভিপিএন ডিসকানেক্ট করে পুনরায় চেষ্টা করুন।");
+                        updateTimer();
+                        updateUI();
+                    }
+                }, 1000);
+            } else {
+                executeAdPlayback();
+            }
+        }
+
+        function executeAdPlayback() {
             const currentTaskNum = adCount + 1;
             const isRewardedType = (currentTaskNum % 2 !== 0);
+            const btnText = document.getElementById('btnText');
 
-            const btn = document.getElementById('adButton');
-            if (!btn) return;
-
-            if (typeof show_11364833 === "function") {
-                btn.disabled = true;
-                document.getElementById('btnText').innerText = "Loading Ad Player...";
-
-                // Execute appropriate interactive ad format
+            try {
                 let adPromise = isRewardedType ? show_11364833() : show_11364833('pop');
 
                 adPromise.then(function() {
-                    // Ad completed successfully! Now start 15s watch verification timer
                     let verifySeconds = 15;
-                    document.getElementById('btnText').innerText = '📡 VERIFYING WATCH (' + verifySeconds + 's)...';
+                    btnText.innerText = '📡 VERIFYING WATCH (' + verifySeconds + 's)...';
                     
                     let verifyInterval = setInterval(function() {
                         verifySeconds--;
                         if (verifySeconds > 0) {
-                            document.getElementById('btnText').innerText = '📡 VERIFYING WATCH (' + verifySeconds + 's)...';
+                            btnText.innerText = '📡 VERIFYING WATCH (' + verifySeconds + 's)...';
                         } else {
                             clearInterval(verifyInterval);
                         }
@@ -1305,12 +1325,13 @@
                     }, 15000); // 15s Verification
                 }).catch(function(e) {
                     console.error('Ad Error:', e);
-                    alert("বিজ্ঞাপন লোড হতে সমস্যা হয়েছে বা বন্ধ করা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন!");
+                    alert("বিজ্ঞাপন প্লে হতে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন!");
                     updateTimer();
                     updateUI();
                 });
-            } else {
-                alert("Ad SDK লোড হয়নি! আপনার ইন্টারনেট কানেকশন বা AdBlocker চেক করুন।");
+            } catch (err) {
+                console.error(err);
+                alert("বিজ্ঞাপন প্রদর্শন করতে ব্যর্থ হয়েছে!");
                 updateTimer();
                 updateUI();
             }
