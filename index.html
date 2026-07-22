@@ -13,7 +13,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-    <!-- Ad Network SDK (Loaded with Explicit Protocol) -->
+    <!-- Ad Network SDK -->
     <script src="https://libtl.com/sdk.js" data-zone="11364833" data-sdk="show_11364833"></script>
 
     <!-- Lottie for animations -->
@@ -371,7 +371,7 @@
             stroke-linecap: round;
             stroke-dasharray: 251.2;
             stroke-dashoffset: 251.2;
-            transition: stroke-dashoffset 1s ease-out;
+            transition: stroke-dashoffset 0.8s ease-out;
         }
 
         .progress-text {
@@ -421,7 +421,7 @@
             height: 100%;
             background: linear-gradient(135deg, #F59E0B 0%, #EA580C 100%);
             border-radius: 3px;
-            transition: width 1s ease-out;
+            transition: width 0.8s ease-out;
             position: relative;
         }
 
@@ -526,29 +526,10 @@
         }
 
         .task-status {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-end;
             flex-shrink: 0;
-            transition: all 0.3s ease;
-        }
-
-        .task-status.pending {
-            background: rgba(245, 158, 11, 0.08);
-            color: #D97706;
-        }
-
-        .task-status.completed {
-            background: #0D9488;
-            color: #FFFFFF;
-        }
-
-        .task-status.locked {
-            background: rgba(15, 23, 42, 0.03);
-            color: #64748B;
         }
 
         /* Timer Display */
@@ -728,48 +709,45 @@
 </head>
 <body>
 
-    <!-- ==================== FIREBASE LOGIN OVERLAY CARD ==================== -->
-    <div id="auth-overlay" class="fixed inset-0 z-[150] bg-black/80 flex items-center justify-center p-4 backdrop-blur-md hidden transition-opacity duration-500">
-        <div class="bg-[#151B2D] border border-[#FF6B00]/30 rounded-2xl p-6 w-full max-w-sm shadow-[0_0_30px_rgba(255,107,0,0.15)] relative">
+    <!-- ==================== FIREBASE LOGIN OVERLAY CARD (WHITE THEME) ==================== -->
+    <div id="auth-overlay" class="fixed inset-0 z-[150] bg-black/60 flex items-center justify-center p-4 backdrop-blur-md hidden transition-opacity duration-500">
+        <div class="bg-white border border-slate-200 rounded-3xl p-6 w-full max-w-sm shadow-2xl relative">
             <div class="text-center mb-5">
-                <img src="https://pub-4c6b2dbf3a0c4862a8964b1546de6283.r2.dev/Free fire/App logo.png" class="w-14 h-14 mx-auto object-contain border border-[#FF6B00]/40 rounded-full shadow-lg">
-                <h3 class="font-game font-black text-sm text-[#FFCC00] mt-3 tracking-widest uppercase">BOOYAH AUTHENTICATION</h3>
-                <p class="text-[10px] text-[#7E8B9B] mt-1 font-semibold">Enter your Arena account credentials to sync rewards.</p>
+                <img src="https://pub-4c6b2dbf3a0c4862a8964b1546de6283.r2.dev/Free fire/App logo.png" class="w-14 h-14 mx-auto object-contain border border-amber-500/40 rounded-full shadow-md">
+                <h3 class="font-game font-black text-sm text-slate-900 mt-3 tracking-widest uppercase">BOOYAH AUTHENTICATION</h3>
+                <p class="text-[11px] text-slate-500 mt-1 font-medium">Enter your Arena account credentials to sync rewards.</p>
             </div>
             
             <form id="login-form" class="space-y-4">
                 <div>
-                    <label class="block text-[10px] font-bold text-[#7E8B9B] mb-1.5 uppercase font-game">Arena Email</label>
-                    <input type="email" id="login-email" placeholder="gamer@booyah.com" class="w-full bg-[#0A0E1A] border border-[#FF6B00]/20 focus:border-[#FF6B00] text-xs px-4 py-3 rounded-xl text-white outline-none font-medium placeholder:text-[#7E8B9B]/60 transition" required>
+                    <label class="block text-[10px] font-bold text-slate-600 mb-1.5 uppercase font-game">Arena Email</label>
+                    <input type="email" id="login-email" placeholder="gamer@booyah.com" class="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 text-xs px-4 py-3 rounded-xl text-slate-900 outline-none font-medium placeholder:text-slate-400 transition" required>
                 </div>
                 <div>
-                    <label class="block text-[10px] font-bold text-[#7E8B9B] mb-1.5 uppercase font-game">Password</label>
-                    <input type="password" id="login-password" placeholder="••••••••" class="w-full bg-[#0A0E1A] border border-[#FF6B00]/20 focus:border-[#FF6B00] text-xs px-4 py-3 rounded-xl text-white outline-none font-medium placeholder:text-[#7E8B9B]/60 transition" required>
+                    <label class="block text-[10px] font-bold text-slate-600 mb-1.5 uppercase font-game">Password</label>
+                    <input type="password" id="login-password" placeholder="••••••••" class="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 text-xs px-4 py-3 rounded-xl text-slate-900 outline-none font-medium placeholder:text-slate-400 transition" required>
                 </div>
                 
-                <button type="submit" id="login-btn" class="w-full py-3.5 mt-2 bg-gradient-to-r from-[#FF6B00] to-[#FFCC00] text-[#0A0E1A] font-game font-black text-xs tracking-widest rounded-xl transition shadow-[0_0_15px_rgba(255,107,0,0.2)] hover:brightness-110 active:scale-95">CONNECT NOW</button>
+                <button type="submit" id="login-btn" class="w-full py-3.5 mt-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-game font-black text-xs tracking-widest rounded-xl transition shadow-lg hover:brightness-110 active:scale-95">CONNECT NOW</button>
             </form>
         </div>
     </div>
 
-    <!-- ==================== ULTRA-PREMIUM BENGALI TRANSFER MODAL ==================== -->
-    <div id="transfer-modal" class="fixed inset-0 z-[200] bg-black/85 flex items-center justify-center p-4 backdrop-blur-md hidden transition-all duration-300">
-        <div class="bg-[#151B2D] border border-[#FF6B00]/40 rounded-3xl p-6 w-full max-w-sm shadow-[0_0_50px_rgba(255,107,0,0.25)] relative text-center overflow-hidden">
-            <!-- Background Glow Elements -->
-            <div class="absolute -top-12 -left-12 w-28 h-28 bg-[#FF6B00]/20 rounded-full blur-2xl"></div>
-            <div class="absolute -bottom-12 -right-12 w-28 h-28 bg-[#FFCC00]/20 rounded-full blur-2xl"></div>
+    <!-- ==================== PURE WHITE THEME BENGALI TRANSFER MODAL ==================== -->
+    <div id="transfer-modal" class="fixed inset-0 z-[200] bg-black/60 flex items-center justify-center p-4 backdrop-blur-md hidden transition-all duration-300">
+        <div class="bg-white border border-slate-200 rounded-3xl p-6 w-full max-w-sm shadow-2xl relative text-center overflow-hidden">
 
-            <div id="transfer-modal-icon" class="text-5xl mb-2 drop-shadow-[0_0_15px_rgba(255,204,0,0.4)]">⚡</div>
-            <h3 id="transfer-modal-title" class="font-game font-black text-base text-[#FFCC00] tracking-widest uppercase mb-1">BOOYAH WALLET SYNC</h3>
-            <p id="transfer-modal-subtitle" class="text-[10px] text-[#7E8B9B] font-bold uppercase font-game mb-4 tracking-wider">Direct Wallet Sync Protocol</p>
+            <div id="transfer-modal-icon" class="text-5xl mb-2 drop-shadow-sm">⚡</div>
+            <h3 id="transfer-modal-title" class="font-game font-black text-base text-[#0F172A] tracking-widest uppercase mb-1">BOOYAH WALLET SYNC</h3>
+            <p id="transfer-modal-subtitle" class="text-[10px] text-slate-500 font-bold uppercase font-game mb-4 tracking-wider">Direct Wallet Sync Protocol</p>
             
             <div id="transfer-modal-body" class="space-y-3 mb-5 text-left">
                 <!-- Dynamic Content & Progress Bars Injected Here -->
             </div>
             
             <div id="transfer-modal-actions" class="flex gap-3 pt-2">
-                <button id="transfer-modal-close" onclick="closeTransferModal()" class="w-full py-3.5 bg-[#0A0E1A] border border-white/10 text-white font-black text-xs rounded-xl font-game tracking-wider active:scale-95 transition">বন্ধ করুন</button>
-                <button id="transfer-modal-confirm" onclick="executeTransfer()" class="w-full py-3.5 bg-gradient-to-r from-[#FF6B00] to-[#FFCC00] text-[#0A0E1A] font-black text-xs rounded-xl font-game tracking-wider shadow-[0_0_15px_rgba(255,107,0,0.3)] hover:brightness-110 active:scale-95 transition hidden">কনফার্ম ট্রান্সফার</button>
+                <button id="transfer-modal-close" onclick="closeTransferModal()" class="w-full py-3.5 bg-slate-100 text-slate-700 font-bold text-xs rounded-xl font-game tracking-wider hover:bg-slate-200 active:scale-95 transition">বন্ধ করুন</button>
+                <button id="transfer-modal-confirm" onclick="executeTransfer()" class="w-full py-3.5 bg-gradient-to-r from-[#FF6B00] to-[#FFCC00] text-slate-900 font-black text-xs rounded-xl font-game tracking-wider shadow-md hover:brightness-105 active:scale-95 transition hidden">কনফার্ম ট্রান্সফার</button>
             </div>
         </div>
     </div>
@@ -827,14 +805,15 @@
                     <span>🔥</span> OPEN BOOYAH DAY APP
                 </button>
 
+                <!-- Updated Lifetime vs Today's Completed Stats -->
                 <div class="coin-stats">
                     <div class="stat-item">
                         <div class="stat-value" id="totalAds">0</div>
-                        <div class="stat-label">Total Ads Watched</div>
+                        <div class="stat-label">Lifetime Completed</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-value" id="tasksDone">0</div>
-                        <div class="stat-label">Completed Tasks</div>
+                        <div class="stat-label">Today's Tasks</div>
                     </div>
                 </div>
             </div>
@@ -960,6 +939,7 @@
         let coins = parseInt(localStorage.getItem('coins')) || 0;
         let diamonds = parseFloat(localStorage.getItem('diamonds')) || 0.00;
         let adCount = parseInt(localStorage.getItem('adCount')) || 0;
+        let lifetimeAdCount = parseInt(localStorage.getItem('lifetimeAdCount')) || adCount;
         let streak = parseInt(localStorage.getItem('streak')) || 0;
         let lastAdTime = parseInt(localStorage.getItem('lastAdTime')) || 0;
         let timerInterval;
@@ -1056,22 +1036,28 @@
             }
         }
 
-        // ==================== UI UPDATES ====================
+        // ==================== UI UPDATES (FIXED PROGRESS PERCENT) ====================
         function updateUI() {
             try {
                 document.getElementById('coinCount').innerText = coins.toLocaleString();
                 document.getElementById('diamondCount').innerText = diamonds.toFixed(2);
-                document.getElementById('totalAds').innerText = adCount;
-                document.getElementById('tasksDone').innerText = adCount;
+                document.getElementById('totalAds').innerText = lifetimeAdCount; // Lifetime Counter
+                document.getElementById('tasksDone').innerText = adCount;        // Today's Counter
                 document.getElementById('taskCounter').innerText = adCount + '/' + MAX_ADS_PER_DAY;
                 document.getElementById('streakText').innerText = streak + ' Day' + (streak !== 1 ? 's' : '');
 
+                // Dynamically Calculate Daily Progress Percent (0% to 100%)
                 const percent = Math.min((adCount / MAX_ADS_PER_DAY) * 100, 100);
-                const circumference = 2 * Math.PI * 40;
+                const circumference = 2 * Math.PI * 40; // ~251.2
                 const offset = circumference - (percent / 100) * circumference;
-                document.getElementById('progressRing').style.strokeDashoffset = offset;
-                document.getElementById('progressPercent').innerText = Math.round(percent) + '%';
-                document.getElementById('progressBar').style.width = percent + '%';
+
+                const progressRing = document.getElementById('progressRing');
+                const progressBar = document.getElementById('progressBar');
+                const progressPercent = document.getElementById('progressPercent');
+
+                if (progressRing) progressRing.style.strokeDashoffset = offset;
+                if (progressBar) progressBar.style.width = percent + '%';
+                if (progressPercent) progressPercent.innerText = Math.round(percent) + '%';
             } catch (err) {
                 console.error("UI elements missing or errored", err);
             }
@@ -1079,11 +1065,17 @@
             generateTaskList();
         }
 
+        // ==================== TASK LIST GENERATOR (STRICT TIMERS & STATUS) ====================
         function generateTaskList() {
             try {
                 const taskList = document.getElementById('taskList');
                 if (!taskList) return;
                 taskList.innerHTML = '';
+
+                const cooldownTime = getCooldownTime();
+                const timePassed = Date.now() - lastAdTime;
+                const timeLeft = cooldownTime - timePassed;
+                const isTimerActive = (timeLeft > 0);
 
                 for (let i = 1; i <= MAX_ADS_PER_DAY; i++) {
                     const isCompleted = i <= adCount;
@@ -1092,27 +1084,51 @@
 
                     const isRewardedType = (i % 2 !== 0);
                     const adTypeName = isRewardedType ? "Rewarded Interstitial" : "Rewarded Popup";
-                    const cooldownText = (i <= 10) ? "1 Min Cooldown" : "5 Min Cooldown";
+                    const cooldownRuleText = (i <= 10) ? "1 Min Cooldown" : "5 Min Cooldown";
+
+                    let iconSymbol = "";
+                    let statusHtml = "";
+                    let metaText = "Mystery Reward • " + cooldownRuleText;
+
+                    if (isCompleted) {
+                        iconSymbol = '✅';
+                        statusHtml = '<span class="text-xs font-bold text-teal-600">✓ Completed</span>';
+                    } else if (isCurrent) {
+                        if (isTimerActive) {
+                            // Timer active -> Lock icon displayed, NO EMOJI next to timer text!
+                            iconSymbol = '🔒';
+                            const m = Math.floor(timeLeft / 60000);
+                            const s = Math.floor((timeLeft % 60000) / 1000);
+                            metaText = "Wait " + m + "m " + s + "s";
+                            statusHtml = '<span class="text-xs font-bold text-amber-600">🔒 Locked</span>';
+                        } else {
+                            // Timer expired -> Ready!
+                            iconSymbol = '🎁';
+                            statusHtml = '<span class="text-xs font-bold text-emerald-600">▶ Ready</span>';
+                        }
+                    } else {
+                        // Future locked tasks
+                        iconSymbol = '🔒';
+                        statusHtml = '<span class="text-xs font-bold text-slate-400">🔒 Locked</span>';
+                    }
 
                     const card = document.createElement('div');
-                    card.className = "task-card " + (isCompleted ? 'completed' : '') + " " + (isLocked ? 'locked' : '') + " " + (isCurrent ? 'current' : '');
-                    
+                    card.className = "task-card " + (isCompleted ? 'completed' : '') + " " + (isLocked || (isCurrent && isTimerActive) ? 'locked' : '') + " " + (isCurrent && !isTimerActive ? 'current' : '');
+
                     card.innerHTML = '\
-                        <div class="task-icon">' + (isCompleted ? '✅' : '🎁') + '</div>\
+                        <div class="task-icon">' + iconSymbol + '</div>\
                         <div class="task-details">\
                             <div class="task-name" style="font-weight: ' + (isCurrent ? '700' : '600') + '">' + adTypeName + ' #' + i + '</div>\
                             <div class="task-meta">\
-                                <span class="task-reward">Mystery Reward</span>\
-                                <span>•</span>\
-                                <span style="color: ' + (isCurrent ? 'var(--primary-dark)' : 'var(--text-muted)') + '">' + cooldownText + '</span>\
+                                <span>' + metaText + '</span>\
                             </div>\
                         </div>\
-                        <div class="task-status ' + (isCompleted ? 'completed' : isLocked ? 'locked' : 'pending') + '">\
-                            ' + (isCompleted ? '✓' : isLocked ? '🔒' : '▶') + '\
+                        <div class="task-status">\
+                            ' + statusHtml + '\
                         </div>\
                     ';
 
-                    if (isCurrent) {
+                    if (isCurrent && !isTimerActive) {
                         card.addEventListener('click', function(e) {
                             watchAd();
                         });
@@ -1159,12 +1175,14 @@
                         if (nowLeft <= 0) {
                             clearInterval(timerInterval);
                             updateTimer();
+                            updateUI(); // Refresh task status to "Ready"
                         } else {
                             const m = Math.floor(nowLeft / 60000);
                             const s = Math.floor((nowLeft % 60000) / 1000);
                             const timeStr = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
                             timerValue.innerText = timeStr;
                             btnText.innerText = 'Wait ' + m + 'm ' + s + 's';
+                            generateTaskList(); // Refresh active task timer in list
                         }
                     }, 1000);
 
@@ -1223,7 +1241,7 @@
             }
         }
 
-        // ==================== WATCH AD FUNCTION (Smart Retry Engine) ====================
+        // ==================== WATCH AD FUNCTION ====================
         function watchAd() {
             if (adCount >= MAX_ADS_PER_DAY) return;
 
@@ -1247,7 +1265,6 @@
             btn.disabled = true;
             btnText.innerText = "Ad Engine Loading...";
 
-            // Check if show_11364833 is loaded, if not retry for 3 seconds
             if (typeof show_11364833 !== "function") {
                 let retryCount = 0;
                 let checkSDK = setInterval(function() {
@@ -1257,7 +1274,7 @@
                         executeAdPlayback();
                     } else if (retryCount >= 3) {
                         clearInterval(checkSDK);
-                        alert("অ্যাড ইঞ্জিনের সাথে সংযোগ স্থাপন হতে পারছে না!\n\nঅনুগ্রহ করে আপনার ডিভাইসের AdBlocker বা Private DNS বন্ধ করুন অথবা ভিপিএন ডিসকানেক্ট করে পুনরায় চেষ্টা করুন।");
+                        alert("অ্যাড নেটওয়ার্ক লোড হতে পারছে না! দয়া করে আপনার ডিভাইসের AdBlocker/Private DNS বন্ধ করে পুনরায় চেষ্টা করুন।");
                         updateTimer();
                         updateUI();
                     }
@@ -1298,11 +1315,13 @@
                         coins += coinReward;
                         diamonds += diamondReward;
                         adCount++;
+                        lifetimeAdCount++;
                         lastAdTime = Date.now();
 
                         localStorage.setItem('coins', coins);
                         localStorage.setItem('diamonds', diamonds);
                         localStorage.setItem('adCount', adCount);
+                        localStorage.setItem('lifetimeAdCount', lifetimeAdCount);
                         localStorage.setItem('lastAdTime', lastAdTime);
 
                         const updatedDeviceCount = (parseInt(localStorage.getItem('device_daily_adCount')) || 0) + 1;
@@ -1337,7 +1356,7 @@
             }
         }
 
-        // ==================== ULTRA-PREMIUM TRANSFER MODAL SYSTEM ====================
+        // ==================== WHITE THEME BENGALI TRANSFER MODAL ====================
         function transferFunds() {
             try {
                 const currentUser = auth.currentUser;
@@ -1364,12 +1383,12 @@
                     title.innerText = "TRANSFER READY";
                     
                     body.innerHTML = '\
-                        <div class="p-3 bg-[#0A0E1A] rounded-xl border border-[#FFCC00]/30 text-white mb-3">\
-                            <span class="text-[10px] text-[#7E8B9B] font-bold font-game uppercase block mb-1">CONNECTED PROFILE</span>\
-                            <span class="text-xs font-black font-game text-[#FFCC00]">UID: ' + (currentUser.uid) + '</span>\
+                        <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 text-slate-900 mb-3">\
+                            <span class="text-[10px] text-slate-500 font-bold font-game uppercase block mb-1">CONNECTED PROFILE</span>\
+                            <span class="text-xs font-black font-game text-amber-600">UID: ' + (currentUser.uid) + '</span>\
                         </div>\
-                        <p class="text-xs text-[#7E8B9B] font-medium leading-relaxed">\
-                            আপনার অ্যাকাউন্টে <b class="text-white">' + coins + ' কয়েন</b> এবং <b class="text-white">' + diamonds.toFixed(2) + ' ডায়মন্ড</b> সফলভাবে ট্রান্সফার করতে নিচের কনফার্ম বাটনে চাপুন।\
+                        <p class="text-xs text-slate-600 font-medium leading-relaxed text-center">\
+                            আপনার অ্যাকাউন্টে <b class="text-slate-900">' + coins + ' কয়েন</b> এবং <b class="text-slate-900">' + diamonds.toFixed(2) + ' ডায়মন্ড</b> সফলভাবে ট্রান্সফার করতে নিচের কনফার্ম বাটনে চাপুন।\
                         </p>\
                     ';
                     confirmBtn.classList.remove('hidden');
@@ -1378,37 +1397,37 @@
                     title.innerText = "TRANSFER LOCKED";
 
                     const coinStatusBadge = neededCoins <= 0 
-                        ? '<span class="text-[9px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">সম্পূর্ণ ✓</span>'
-                        : '<span class="text-[9px] font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">প্রয়োজন: ' + neededCoins + '</span>';
+                        ? '<span class="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">সম্পূর্ণ ✓</span>'
+                        : '<span class="text-[9px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">প্রয়োজন: ' + neededCoins + '</span>';
 
                     const diamondStatusBadge = neededDiamonds <= 0 
-                        ? '<span class="text-[9px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">সম্পূর্ণ ✓</span>'
-                        : '<span class="text-[9px] font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">প্রয়োজন: ' + neededDiamonds + '</span>';
+                        ? '<span class="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">সম্পূর্ণ ✓</span>'
+                        : '<span class="text-[9px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">প্রয়োজন: ' + neededDiamonds + '</span>';
 
                     body.innerHTML = '\
-                        <p class="text-[11px] text-[#7E8B9B] font-medium mb-3">\
-                            ওয়ালেট ট্রান্সফার করার জন্য মিনিমাম <b class="text-white">১৫০০ কয়েন</b> এবং <b class="text-white">৫.০ ডায়মন্ড</b> প্রয়োজন।\
+                        <p class="text-[11px] text-slate-500 font-medium mb-3 text-center">\
+                            ওয়ালেট ট্রান্সফার করার জন্য মিনিমাম <b class="text-slate-900">১৫০০ কয়েন</b> এবং <b class="text-slate-900">৫.০ ডায়মন্ড</b> প্রয়োজন।\
                         </p>\
                         \
                         <!-- Coin Progress Box -->\
-                        <div class="p-3 bg-[#0A0E1A] rounded-xl border border-white/5 space-y-1.5">\
+                        <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 space-y-1.5">\
                             <div class="flex justify-between items-center text-[11px] font-bold">\
-                                <span class="text-white font-game">🪙 Coins</span>\
-                                <span class="text-[#FFCC00] font-game">' + coins + ' / 1500</span>\
+                                <span class="text-slate-900 font-game">🪙 Coins</span>\
+                                <span class="text-amber-600 font-game">' + coins + ' / 1500</span>\
                             </div>\
-                            <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">\
+                            <div class="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden">\
                                 <div class="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full transition-all" style="width: ' + coinPercent + '%"></div>\
                             </div>\
                             <div class="flex justify-end pt-0.5">' + coinStatusBadge + '</div>\
                         </div>\
                         \
                         <!-- Diamond Progress Box -->\
-                        <div class="p-3 bg-[#0A0E1A] rounded-xl border border-white/5 space-y-1.5 mt-2">\
+                        <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 space-y-1.5 mt-2">\
                             <div class="flex justify-between items-center text-[11px] font-bold">\
-                                <span class="text-white font-game">💎 Diamonds</span>\
-                                <span class="text-cyan-400 font-game">' + diamonds.toFixed(2) + ' / 5.00</span>\
+                                <span class="text-slate-900 font-game">💎 Diamonds</span>\
+                                <span class="text-cyan-600 font-game">' + diamonds.toFixed(2) + ' / 5.00</span>\
                             </div>\
-                            <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">\
+                            <div class="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden">\
                                 <div class="h-full bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full transition-all" style="width: ' + diamondPercent + '%"></div>\
                             </div>\
                             <div class="flex justify-end pt-0.5">' + diamondStatusBadge + '</div>\
