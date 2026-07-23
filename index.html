@@ -1474,34 +1474,52 @@
             try {
                 const userRef = db.collection('users').doc(currentUser.uid);
                 
-                await db.runTransaction(async (transaction) => {
-                    const sfDoc = await transaction.get(userRef);
-                    if (!sfDoc.exists) {
-                        throw "User document does not exist!";
-                    }
-                    
-                    const currentDbCoins = sfDoc.data().coins || 0;
-                    const currentDbDiamonds = sfDoc.data().diamonds || 0;
-                    
-                    const currentTmaCoins = sfDoc.data().tma_coins || 0;
-                    const currentTmaDiamonds = sfDoc.data().tma_diamonds || 0;
+                const sfDoc = await userRef.get();
+                if (!sfDoc.exists) {
+                    throw "User document does not exist!";
+                }
+                
+                const currentTmaCoins = sfDoc.data().tma_coins || 0;
+                const currentTmaDiamonds = sfDoc.data().tma_diamonds || 0;
 
-                    if (currentTmaCoins < 1500 || currentTmaDiamonds < 5.0) {
-                        throw "Insufficient Mini App balance to complete transfer!";
-                    }
-                    
-                    transaction.update(userRef, {
-                        coins: currentDbCoins + currentTmaCoins,
-                        diamonds: currentDbDiamonds + currentTmaDiamonds,
-                        tma_coins: 0,
-                        tma_diamonds: 0.00
-                    });
+                if (currentTmaCoins < 1500 || currentTmaDiamonds < 5.0) {
+                    throw "Insufficient Mini App balance to complete transfer!";
+                }
+                
+                // Secure Transfer via Cloudflare Webhook
+                const CLOUDFLARE_WORKER_URL = "YOUR_CLOUDFLARE_WORKER_URL_HERE/tg-transfer";
+                const SECRET_KEY = "TG_BOOYAH_SECURE_2026_xyz"; // Must match exactly
+
+                const response = await fetch(CLOUDFLARE_WORKER_URL, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        uid: currentUser.uid,
+                        diamonds: currentTmaDiamonds,
+                        coins: currentTmaCoins,
+                        secret_key: SECRET_KEY
+                    })
                 });
 
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error(data.error || "Transfer Failed via API");
+                }
+
+                // Reset local mini app balances in Firestore after successful transfer
+                await userRef.update({
+                    tma_coins: 0,
+                    tma_diamonds: 0.00
+                });
+
+                // Keep transaction history in Firestore for record keeping
                 const trxId = Math.floor(Math.random() * 9000000).toString();
                 await userRef.collection('transactions').doc(trxId).set({
                     title: "TMA REWARD MINING",
-                    amount: diamonds,
+                    amount: currentTmaDiamonds,
                     currency: "diamonds",
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
@@ -1509,13 +1527,13 @@
                 const trxIdCoins = Math.floor(Math.random() * 9000000).toString();
                 await userRef.collection('transactions').doc(trxIdCoins).set({
                     title: "TMA REWARD MINING",
-                    amount: coins,
+                    amount: currentTmaCoins,
                     currency: "coins",
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
                 closeTransferModal();
-                alert('অভিনন্দন! আপনার ' + coins + ' কয়েন এবং ' + diamonds.toFixed(2) + ' ডায়মন্ড Booyah Arena প্রধান অ্যাকাউন্টে সফলভাবে যুক্ত করা হয়েছে।');
+                alert('অভিনন্দন! আপনার ' + currentTmaCoins + ' কয়েন এবং ' + currentTmaDiamonds.toFixed(2) + ' ডায়মন্ড Booyah Arena প্রধান অ্যাকাউন্টে সফলভাবে যুক্ত করা হয়েছে।');
                 
             } catch (err) {
                 console.error("Transfer Error: ", err);
